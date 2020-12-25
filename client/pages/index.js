@@ -26,7 +26,12 @@ export default function Home() {
         <section>
           {Array.isArray(quizes) &&
             quizes.map((q, i) => (
-              <QuizCard id={q._id} name={q.name} difficulty="easy" key={i} />
+              <QuizCard
+                id={q._id}
+                name={q.name}
+                difficulty={q.difficulty}
+                key={i}
+              />
             ))}
         </section>
       </MainView>

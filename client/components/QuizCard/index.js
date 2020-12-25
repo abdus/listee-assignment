@@ -1,5 +1,3 @@
-import React from "react";
-
 function QuizCard(props) {
   return (
     <>
@@ -41,7 +39,11 @@ function QuizCard(props) {
         a span {
           font-size: 0.7em;
           padding: 0.3rem 0.7rem;
-          background: #d1ffd5;
+          background: ${props.difficulty === "easy"
+            ? "#d1ffd5"
+            : props.difficulty === "medium"
+            ? "#f1ffd1"
+            : "#ffd1d1"};
           border-radius: 1rem;
           text-transform: uppercase;
           align-self: start;

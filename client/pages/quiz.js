@@ -43,7 +43,6 @@ function Quiz(props) {
       <ToastContainer />
 
       <MainView>
-        <h2>Quiz Name</h2>
         {error && <ErrorView error={error} />}
 
         {questions && (
