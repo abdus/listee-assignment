@@ -14,6 +14,12 @@ export async function getAllQuizes(req, res) {
 }
 
 export async function getQuestionByQuizID(req, res, next) {
+  if (!req.isAuthinticated) {
+    return res.status(403).json({
+      message: "you are not authorized to access this information",
+    });
+  }
+
   try {
     const { quizid } = req.params;
     const quiz = await Question.find({

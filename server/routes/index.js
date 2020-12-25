@@ -14,10 +14,22 @@ const router = express.Router();
 
 router.post("/signup", handleSignup);
 router.post("/signin", handleSignin);
+router.post("/isloggedin", authenticateReq, (req, res) =>
+  res.json({ message: req.isAuthinticated })
+);
+router.get("/profile", authenticateReq, (req, res) => {
+  if (req.isAuthinticated) {
+    req.user.password = req.user.__v = req.user.salt = null;
+    console.log(req.user);
+    res.json({ message: "success", data: req.user });
+  } else {
+    res.status(403).json({ message: "you are not logged in" });
+  }
+});
 
 // get all quiz sets
 router.get("/quizes", getAllQuizes);
-router.get("/questions/:quizid", getQuestionByQuizID);
+router.get("/questions/:quizid", authenticateReq, getQuestionByQuizID);
 
 // handle quiz submit
 router.post("/submit", authenticateReq, async (req, res) => {
@@ -30,6 +42,7 @@ router.post("/submit", authenticateReq, async (req, res) => {
   let questionsID = [];
   let questionsFromDB = null;
   let counter = 0;
+  console.log(req.body);
 
   for (let i = 0; i < answers.length; i++) {
     questionsID.push(answers[i][0]);
@@ -45,7 +58,7 @@ router.post("/submit", authenticateReq, async (req, res) => {
       }
     }
 
-    res.json({ counter });
+    res.json({ correct: counter, total: answers.length });
   } catch (err) {
     console.log(err);
     return res.status(500).json({
