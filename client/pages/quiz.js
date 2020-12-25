@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from "react";
+import { ToastContainer, toast } from "react-toastify";
 import MainView from "../components/MainView";
 import ErrorView from "../components/ErrorView";
 import QuestionCard from "./../components/QuestionCard";
 import HTTP from "../utils/xhr.js";
+import Nav from "../components/Nav";
 
 function Quiz(props) {
   const [quizID, setQuizID] = useState(null);
   const [error, setError] = useState(null);
   const [questions, setQuestions] = useState(null);
-  const [result, setResult] = useState(null);
 
   useEffect(() => {
     try {
@@ -38,6 +39,9 @@ function Quiz(props) {
 
   return (
     <>
+      <Nav />
+      <ToastContainer />
+
       <MainView>
         <h2>Quiz Name</h2>
         {error && <ErrorView error={error} />}
@@ -56,7 +60,12 @@ function Quiz(props) {
               server
                 .submitQuiz(data)
                 .then((res) => {
-                  setResult(res.counter);
+                  toast.dark(
+                    `🦄 ${res.correct} answers are correct, out of ${res.total} attempted questions.`,
+                    {
+                      position: "top-center",
+                    }
+                  );
                 })
                 .catch(console.error);
             }}
@@ -79,8 +88,6 @@ function Quiz(props) {
             <button style={{ color: "white", background: "red" }} type="reset">
               RESET
             </button>
-
-            <div>{result && `${result} Questions Were Correct`}</div>
 
             <style jsx>{`
               button {

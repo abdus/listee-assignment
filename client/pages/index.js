@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import Head from "next/head";
 import MainView from "../components/MainView";
 import QuizCard from "../components/QuizCard";
 import HTTP from "../utils/xhr.js";
+import Nav from "../components/Nav";
 
 export default function Home() {
   const [quizes, setQuizes] = useState();
@@ -20,6 +20,7 @@ export default function Home() {
 
   return (
     <>
+      <Nav />
       <MainView>
         <h2>Available Quiz</h2>
         <section>

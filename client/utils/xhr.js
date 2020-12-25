@@ -1,6 +1,6 @@
 const baseurl =
   process.env.NODE_ENV === "production"
-    ? "https://someprodurl"
+    ? "https://listee.host.abdus.net/api/v1"
     : "http://localhost:4000/api/v1";
 const SESSION_TOKEN = "session_token";
 
@@ -9,96 +9,132 @@ class HTTP {
 
   async login({ username, password }) {
     try {
-      const resp = await fetchServer(`/signin`, {
+      const resp = await fetchServer("/signin", {
         method: "POST",
         body: JSON.stringify({ username, password }),
       });
 
-      console.log(resp);
-
-      if (resp.token) {
-        window.sessionStorage.setItem(SESSION_TOKEN, resp.token);
-        return { message: "login successful", error: null };
-      }
-
-      return {
-        message: "login failed. " + "maybe you want to sign up?",
-        error: true,
-      };
-    } catch (ex) {
-      console.log(ex.message);
-      return { message: "login failed. " + ex.message, error: true };
+      window.sessionStorage.setItem(SESSION_TOKEN, resp.token);
+      return resp;
+    } catch (err) {
+      throw Error(err.message || "something went wrong");
     }
   }
 
   async signUp({ username, password }) {
     try {
-      const resp = await fetchServer(`/signin`, {
+      const resp = await fetchServer("/signup", {
         method: "POST",
         body: JSON.stringify({ username, password }),
       });
-    } catch (ex) {
-      console.log(ex.message);
-      return { message: "login failed. " + ex.message, error: true };
+
+      window.sessionStorage.setItem(SESSION_TOKEN, resp.token);
+      return resp;
+    } catch (err) {
+      throw Error(err.message || "something went wrong");
+    }
+  }
+
+  async isLoggedIn() {
+    try {
+      const resp = await fetchServer(`/isloggedin`, {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${window.sessionStorage.getItem(
+            SESSION_TOKEN
+          )}`,
+        },
+      });
+      return resp;
+    } catch (err) {
+      throw Error(err.message || "something went wrong");
     }
   }
 
   async getQuizes() {
     try {
-      return await fetchServer(`/quizes`);
+      const resp = await fetchServer("/quizes");
+      return resp;
     } catch (err) {
-      console.log(err);
-      return { message: "error: " + err.message, error: true };
+      throw Error(err.message || "something went wrong");
     }
   }
 
   async getQuestionByQuizId(id) {
     try {
-      return await fetchServer(`/questions/${id}`);
+      const resp = await fetchServer(`/questions/${id}`, {
+        headers: {
+          authorization: `Bearer ${window.sessionStorage.getItem(
+            SESSION_TOKEN
+          )}`,
+        },
+      });
+      return resp;
     } catch (err) {
-      console.log(err);
-      return { message: "error: " + err.message, error: true };
+      throw Error(err.message || "something went wrong");
     }
   }
 
   async submitQuiz(data) {
     try {
-      return await fetchServer(`/submit`, {
-        headers: {
-          "Content-Type": "application/json",
-          cors: "no-cors",
-          accept: "application/json",
-          Authorization:
-            "Bearer " + window.sessionStorage.getItem(SESSION_TOKEN),
-        },
+      const resp = await fetchServer(`/submit`, {
         method: "POST",
         body: JSON.stringify({ answers: data }),
+        headers: {
+          authorization: `Bearer ${window.sessionStorage.getItem(
+            SESSION_TOKEN
+          )}`,
+          "content-type": "application/json",
+          accept: "application/json",
+        },
       });
+      return resp;
     } catch (err) {
-      console.log({ err });
-      return { message: "error: " + err.message, error: true };
+      throw Error(err.message || "something went wrong");
+    }
+  }
+
+  async getUserProfile() {
+    try {
+      const user = await fetchServer(`/profile`, {
+        headers: {
+          authorization: `Bearer ${window.sessionStorage.getItem(
+            SESSION_TOKEN
+          )}`,
+          "content-type": "application/json",
+          accept: "application/json",
+        },
+      });
+      return user;
+    } catch (err) {
+      throw Error(err.message || "something went wrong");
     }
   }
 }
 
 async function fetchServer(path, fetchOpts) {
-  const raw = await window.fetch(baseurl + path, {
-    headers: {
-      "Content-Type": "application/json",
-      cors: "no-cors",
-      accept: "application/json",
-    },
-    ...fetchOpts,
-  });
+  try {
+    const raw = await fetch(`${baseurl}${path}`, {
+      headers: {
+        "content-type": "application/json",
+        accept: "application/json",
+      },
+      ...fetchOpts,
+    });
 
-  let json = undefined;
-  if (raw.ok) json = await raw.json();
+    const json = await raw.json();
 
-  if (raw.status !== 200 && json) {
-    throw Error(json.message || "something went wrong");
+    // throw an error if code != 200
+    if (raw.status !== 200) {
+      const err = new Error(json.message);
+      err.code = raw.status;
+      throw err;
+    }
+
+    return json;
+  } catch (e) {
+    throw e;
   }
-
-  return { message: "something is wrong" };
 }
 
 export default HTTP;
