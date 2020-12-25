@@ -20,7 +20,6 @@ router.post("/isloggedin", authenticateReq, (req, res) =>
 router.get("/profile", authenticateReq, (req, res) => {
   if (req.isAuthinticated) {
     req.user.password = req.user.__v = req.user.salt = null;
-    console.log(req.user);
     res.json({ message: "success", data: req.user });
   } else {
     res.status(403).json({ message: "you are not logged in" });
@@ -42,7 +41,6 @@ router.post("/submit", authenticateReq, async (req, res) => {
   let questionsID = [];
   let questionsFromDB = null;
   let counter = 0;
-  console.log(req.body);
 
   for (let i = 0; i < answers.length; i++) {
     questionsID.push(answers[i][0]);
