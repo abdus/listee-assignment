@@ -25,6 +25,7 @@ function QuizCard(props) {
           z-index: 100;
           text-decoration: none;
           color: #141414;
+          background: #fff;
         }
 
         @media (max-width: 900px) {
